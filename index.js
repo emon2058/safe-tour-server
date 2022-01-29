@@ -43,7 +43,7 @@ async function run(){
         })
         app.get('/blogs', async(req,res)=>{
             const cursor = blogsCollection.find({});
-            console.log(req.query)
+            // console.log(req.query)
             const page = req.query.page;
             const size = parseInt(req.query.size);
             const count = await cursor.count();
@@ -69,6 +69,35 @@ async function run(){
             const result = await blogsCollection.insertOne(blog);
             res.json(result); 
         })
+        app.put('/blogs/:id',async(req,res)=>{
+            const id = req.params.id;
+            const updateBlog = req.body;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updateDoc = {
+                $set:{
+                    img: updateBlog.img,
+                    title: updateBlog.title,
+                    name: updateBlog.name,
+                    description: updateBlog.description,
+                    category: updateBlog.category,
+                    price: updateBlog.price,
+                    location: updateBlog.location
+                }
+            }
+            const result = await blogsCollection.updateOne(filter,updateDoc,options)
+            console.log('update',id);
+            res.json(result)
+            // res.send('updating')
+
+
+        })
+        app.delete('/blogs/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)};
+            const result = await blogsCollection.deleteOne(query);
+            res.json(result)
+        })
 
         // find single user 
         app.get('/users/:email',async(req,res)=>{
@@ -85,6 +114,15 @@ async function run(){
         app.post('/users',async(req,res)=>{
             const user = req.body;
             const result = await usersCollection.insertOne(user);
+            res.json(result)
+        })
+
+        app.put('/users',async(req,res)=>{
+            const user = req.body;
+            const filter={email:user.email};
+            const updateDoc = {$set:user};
+            const options = {upsert:true};
+            const result = await usersCollection.updateOne(filter,updateDoc,options);
             res.json(result)
         })
         // make user an admin
